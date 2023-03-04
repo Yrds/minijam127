@@ -1,19 +1,12 @@
-# 2048im
-
-Improved version of 2048 game made with raylib
+# Minijam 127 - Cat Pong
 
 ## Milestones
 
-- [x] Fully functional classic version
-- [ ] Beautiful menu and animations
-- [ ] Improved Version
-- [ ] Online Scoreboard
+- [ ] Pong gameplay
+- [ ] Animations
+- [ ] Sound effects
 
 ## Screenshots
-
-![01](screenshots/01.png)
-![02](screenshots/02.png)
-![03](screenshots/03.png)
 
 ## Setting up
 Native builds:
