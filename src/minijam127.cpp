@@ -404,6 +404,12 @@ void frame() {
   EndDrawing();
 }
 
+void destroyAssets() {
+  for(auto asset: catImages) {
+    UnloadTexture(asset.texture);
+  }
+}
+
 int main(int argc, const char **argv) {
   InitWindow(windowSize.x, windowSize.y, "cat pong");
 
@@ -420,6 +426,9 @@ int main(int argc, const char **argv) {
     frame();
   }
 #endif
+
+  destroyAssets();
+
   CloseWindow();
 
   return 0;
