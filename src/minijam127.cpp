@@ -45,7 +45,7 @@ struct Cat {
   bool attacking = false;
   float attackingTime = 0;
   float attackCoolDown = 30;
-  Animation currentAnimation;
+  Animation* currentAnimation;
   int currentFrame = 0;
   int animationStep = 0;
 };
@@ -73,7 +73,6 @@ std::array<Cat, 2> cats;
 
 std::vector<Animation> catImages;
 
-
 bool gameOver = true;
 
 void initAssets() {
@@ -99,8 +98,8 @@ void startGame() {
                       windowSize.y / 2};
   cats[1].flip = -1;
 
-  cats[1].currentAnimation = catImages[0];
-  cats[0].currentAnimation = catImages[0];
+  cats[1].currentAnimation = &catImages[0];
+  cats[0].currentAnimation = &catImages[0];
 
   points.fill(0);
 
@@ -112,10 +111,10 @@ void startGame() {
 
 Rectangle getCatRec(const Cat &cat) {
   const auto frameWidth =
-      static_cast<float>(cat.currentAnimation.texture.width) * cat.scale /
-      cat.currentAnimation.frames;
+      static_cast<float>(cat.currentAnimation->texture.width) * cat.scale /
+      cat.currentAnimation->frames;
   const auto frameHeight =
-      static_cast<float>(cat.currentAnimation.texture.height) * cat.scale;
+      static_cast<float>(cat.currentAnimation->texture.height) * cat.scale;
   return {cat.position.x - (frameWidth / 2.0f),
           cat.position.y - (frameHeight / 2.0f), frameWidth, frameHeight};
 }
@@ -127,10 +126,10 @@ void drawCatPosition(const Cat &cat) {
 
 void drawCats() {
   for (const auto &cat : cats) {
-    auto frameWidth = static_cast<float>(cat.currentAnimation.texture.width) /
-                      cat.currentAnimation.frames;
+    auto frameWidth = static_cast<float>(cat.currentAnimation->texture.width) /
+                      cat.currentAnimation->frames;
     auto frameHeight = static_cast<float>(catImages[0].texture.height);
-    DrawTexturePro(cat.currentAnimation.texture,
+    DrawTexturePro(cat.currentAnimation->texture,
                    {cat.currentFrame * frameWidth, 0.0f,
                     frameWidth * (cat.flip), frameHeight},
                    {cat.position.x - (frameWidth / 2.0f * cat.scale),
@@ -143,7 +142,7 @@ void drawCats() {
 
 void processAnimation() {
   for (auto &cat : cats) {
-    cat.animationStep = (cat.animationStep + 1) % cat.currentAnimation.speed;
+    cat.animationStep = (cat.animationStep + 1) % cat.currentAnimation->speed;
     if (cat.animationStep == 0) {
       cat.currentFrame = (cat.currentFrame + 1) % 100;
     }
@@ -239,15 +238,15 @@ void processCatsState() {
     case IDLE:
       cat.direction = 0;
       cat.attackingTime = 0;
-      cat.currentAnimation = catImages[0];
+      cat.currentAnimation = &catImages[0];
       break;
     case WALKING_DOWN:
     case WALKING_UP:
-      cat.currentAnimation = catImages[1];
+      cat.currentAnimation = &catImages[1];
       cat.position.y += cat.direction * cat.speed;
       break;
     case ATTACKING:
-      cat.currentAnimation = catImages[2];
+      cat.currentAnimation = &catImages[2];
       cat.attackingTime++;
       break;
     }
