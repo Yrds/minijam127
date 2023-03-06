@@ -3,7 +3,7 @@
 ## Milestones
 
 - [ ] Pong gameplay
-- [ ] Animations
+- [x] Animations
 - [ ] Sound effects
 
 ## Screenshots
