@@ -49,7 +49,10 @@ elif host_machine.system() == 'emscripten'
   link_args += [
     '-s', 'ENVIRONMENT=web',
     '-s', 'USE_GLFW=3',
+    '-s', 'ALLOW_MEMORY_GROWTH',
+    '-s', 'ASYNCIFY',
     '-o', 'index.html',
+    '--preload-file', '../../assets',
     '--shell-file', '../../emscripten/shell_minimal.html' #figureout a way to use a environment variable to meson root dir
   ]
   name_suffix = 'html'
