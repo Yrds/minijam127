@@ -20,6 +20,7 @@ raylib_opts.add_cmake_defines({
 if cc.get_id() == 'emscripten'
   raylib_opts.add_cmake_defines({
     'PLATFORM': 'Web',
+    'GRAPHICS': 'API_OPENGL_ES2'
   })
 else
   raylib_opts.add_cmake_defines({
@@ -49,9 +50,14 @@ elif host_machine.system() == 'emscripten'
   link_args += [
     '-s', 'ENVIRONMENT=web',
     '-s', 'USE_GLFW=3',
-    '-s', 'ALLOW_MEMORY_GROWTH',
+    '-s', 'ASSERTIONS=1',
+    '-s', 'WASM=1',
+    '-s', 'ALLOW_MEMORY_GROWTH=1',
+    '-s', 'TOTAL_MEMORY=16777216',
     '-s', 'ASYNCIFY',
+    '-s', 'FORCE_FILESYSTEM=1',
     '-o', 'index.html',
+    '--memory-init-file', '0',
     '--preload-file', '../../assets',
     '--shell-file', '../../emscripten/shell_minimal.html' #figureout a way to use a environment variable to meson root dir
   ]
