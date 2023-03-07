@@ -8,7 +8,7 @@
 #include <array>
 #include <iostream>
 #include <string>
-#include <vector>
+#include <memory>
 
 Vector2 windowSize{800, 400};
 
@@ -29,9 +29,13 @@ enum CatState {
 };
 
 struct Animation {
+  Animation(Texture2D texture, int frames, int speed): texture(texture), frames(frames), speed(speed) {}
   Texture2D texture;
   int frames;
   int speed = 60;
+  ~Animation() {
+    UnloadTexture(texture);
+  }
 };
 
 
@@ -65,20 +69,20 @@ int markedPoints = 0;
 
 Ball ball{{0,0}, 2};
 
-std::vector<Ball> ballTrace;
-
 int ballReactionTime = 60; //1 second
 
 std::array<Cat, 2> cats;
 
-std::vector<Animation> catImages;
+std::unique_ptr<Animation> runAnimation;
+std::unique_ptr<Animation> idleAnimation;
+std::unique_ptr<Animation> attackAnimation;
 
 bool gameOver = true;
 
 void initAssets() {
-  catImages.push_back({LoadTexture("assets/cat_0_idle_1.png"), 2});
-  catImages.push_back({LoadTexture("assets/cat_0_run.png"), 8, 7});
-  catImages.push_back({LoadTexture("assets/cat_0_attack.png"), 6, 5});
+  idleAnimation = std::make_unique<Animation>(LoadTexture("assets/cat_0_idle_1.png"), 2, 60);
+  runAnimation = std::make_unique<Animation>(LoadTexture("assets/cat_0_run.png"), 8, 7);
+  attackAnimation = std::make_unique<Animation>(LoadTexture("assets/cat_0_attack.png"), 6, 5);
 
   ball.texture = LoadTexture("assets/yarn.png");
 }
@@ -89,25 +93,23 @@ void placeBall() {
 }
 
 void startGame() {
-  cats[0].position = {(catImages[0].texture.width * cats[0].scale) / 2.0f +
+  cats[1].currentAnimation = idleAnimation.get();
+  cats[0].currentAnimation = idleAnimation.get();
+
+  cats[0].position = {(cats[0].currentAnimation->texture.width * cats[0].scale) / 2.0f +
                           10.0f,
                       windowSize.y / 2};
   cats[1].position = {windowSize.x -
-                          (catImages[0].texture.width * cats[0].scale) / 2.0f -
+                          (cats[0].currentAnimation->texture.width * cats[0].scale) / 2.0f -
                           10.0f,
                       windowSize.y / 2};
   cats[1].flip = -1;
 
-  cats[1].currentAnimation = &catImages[0];
-  cats[0].currentAnimation = &catImages[0];
 
   points.fill(0);
 
   placeBall();
 }
-
-
-
 
 Rectangle getCatRec(const Cat &cat) {
   const auto frameWidth =
@@ -128,15 +130,17 @@ void drawCats() {
   for (const auto &cat : cats) {
     auto frameWidth = static_cast<float>(cat.currentAnimation->texture.width) /
                       cat.currentAnimation->frames;
-    auto frameHeight = static_cast<float>(catImages[0].texture.height);
+    auto frameHeight = static_cast<float>(cat.currentAnimation->texture.height);
     DrawTexturePro(cat.currentAnimation->texture,
                    {cat.currentFrame * frameWidth, 0.0f,
                     frameWidth * (cat.flip), frameHeight},
                    {cat.position.x - (frameWidth / 2.0f * cat.scale),
                     cat.position.y - (frameHeight / 2.0f * cat.scale),
                     frameWidth * cat.scale, frameHeight * cat.scale},
-                   {0.0f, 0.0f}, 0.0f, WHITE);
-    //drawCatPosition(cat);
+                   {frameWidth, frameHeight}, 0.0f, WHITE);
+
+
+    // drawCatPosition(cat);
   }
 }
 
@@ -238,15 +242,15 @@ void processCatsState() {
     case IDLE:
       cat.direction = 0;
       cat.attackingTime = 0;
-      cat.currentAnimation = &catImages[0];
+      cat.currentAnimation = idleAnimation.get();
       break;
     case WALKING_DOWN:
     case WALKING_UP:
-      cat.currentAnimation = &catImages[1];
+      cat.currentAnimation = runAnimation.get();
       cat.position.y += cat.direction * cat.speed;
       break;
     case ATTACKING:
-      cat.currentAnimation = &catImages[2];
+      cat.currentAnimation = attackAnimation.get();
       cat.attackingTime++;
       break;
     }
@@ -404,11 +408,6 @@ void frame() {
   EndDrawing();
 }
 
-void destroyAssets() {
-  for(auto asset: catImages) {
-    UnloadTexture(asset.texture);
-  }
-}
 
 int main(int argc, const char **argv) {
   InitWindow(windowSize.x, windowSize.y, "cat pong");
@@ -419,6 +418,7 @@ int main(int argc, const char **argv) {
 
   SetTargetFPS(60);
 
+
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(&frame, 0, 1);
 #else
@@ -427,7 +427,9 @@ int main(int argc, const char **argv) {
   }
 #endif
 
-  destroyAssets();
+  idleAnimation.reset();
+  runAnimation.reset();
+  attackAnimation.reset();
 
   CloseWindow();
 
