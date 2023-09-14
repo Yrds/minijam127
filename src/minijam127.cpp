@@ -146,10 +146,19 @@ void drawCats() {
 
 void processAnimation() {
   for (auto &cat : cats) {
+
+    const auto animationFrames = cat.currentAnimation->frames;
+
+    if(cat.currentFrame > animationFrames) {
+      cat.currentFrame = 0;
+    } 
+
     cat.animationStep = (cat.animationStep + 1) % cat.currentAnimation->speed;
+
     if (cat.animationStep == 0) {
-      cat.currentFrame = (cat.currentFrame + 1) % 100;
+      cat.currentFrame = (cat.currentFrame + 1) % animationFrames;
     }
+
   }
 }
 

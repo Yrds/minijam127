@@ -27,9 +27,8 @@ else
     'PLATFORM': 'Desktop',
   })
 endif
-raylib_subproject = cmake.subproject('raylib', options: raylib_opts)
+raylib_subproject = cmake.subproject('raylib-4.5.0', options: raylib_opts)
 dependencies += raylib_subproject.dependency('raylib')
-
 
 # General configuration
 if host_machine.system() == 'windows'
@@ -49,15 +48,19 @@ elif host_machine.system() == 'linux'
 elif host_machine.system() == 'emscripten'
   link_args += [
     '-s', 'ENVIRONMENT=web',
+
     '-s', 'USE_GLFW=3',
+    #'-s', 'LEGACY_GL_EMULATION=1',
+
     '-s', 'ASSERTIONS=1',
-    '-s', 'WASM=1',
-    '-s', 'ALLOW_MEMORY_GROWTH=1',
-    '-s', 'TOTAL_MEMORY=16777216',
+    '-s', 'WASM=0',
+    '-s', 'TOTAL_MEMORY=67108864',
     '-s', 'ASYNCIFY',
-    '-s', 'FORCE_FILESYSTEM=1',
     '-o', 'index.html',
-    '--memory-init-file', '0',
+    '-sFULL_ES3',
+    '--memory-init-file', '1',
+    '--memory-profiler',
+    '--use-preload-plugins',
     '--preload-file', '../../assets',
     '--shell-file', '../../emscripten/shell_minimal.html' #figureout a way to use a environment variable to meson root dir
   ]
@@ -81,7 +84,7 @@ exe = executable('minijam127',
   include_directories: inc_dir,
   link_args: link_args,
   name_suffix: name_suffix,
+  override_options: ['default_library=static'] 
 )
 
 generate_html_zip = run_target('zip', depends: [exe], command: ['scripts/zip.sh'])
-

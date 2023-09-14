@@ -1,4 +1,6 @@
-[wrap-git]
-url = https://github.com/raysan5/raylib
-revision = head
-depth = 1
+[wrap-file]
+directory = raylib-4.5
+
+source_filename = 4.5.0.tar.gz
+source_url = https://github.com/raysan5/raylib/archive/refs/tags/4.5.0.tar.gz
+source_hash = 0df98bfc553db31356cab46a2f9ed6d932065f186a0fff24bafa05f8a60e16d1
