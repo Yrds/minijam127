@@ -149,7 +149,7 @@ void processAnimation() {
 
     const auto animationFrames = cat.currentAnimation->frames;
 
-    if(cat.currentFrame > animationFrames) {
+    if(cat.currentFrame >= animationFrames) {
       cat.currentFrame = 0;
     } 
 
